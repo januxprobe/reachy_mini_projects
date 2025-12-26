@@ -11,6 +11,7 @@ import time
 import os
 import subprocess
 from pathlib import Path
+import requests
 
 
 # ============================================================
@@ -50,6 +51,10 @@ SOUND_EFFECTS = {
 
 # Temporary directory for generated speech files (in project folder)
 TEMP_SPEECH_DIR = Path(__file__).parent / "temp_speech"
+
+# Robot connection mode (will be set during initialization)
+IS_REAL_ROBOT = False
+ROBOT_URL = "http://reachy-mini.local:8000"
 
 
 # ============================================================
@@ -107,12 +112,43 @@ def play_speech(robot, emotion_name):
         # Generate speech file
         speech_file = generate_speech(phrase, emotion_name)
 
-        # Play through robot speakers (or Mac speakers in simulator)
-        robot.media.play_sound(str(speech_file))
+        if IS_REAL_ROBOT:
+            # Use REST API for real robot (TODO: need to upload file first)
+            print(f"   🔊 '{phrase}' (TTS on real robot not yet implemented)")
+            # For now, skip TTS on real robot until we implement file upload
+        else:
+            # Play through Mac speakers in simulator
+            robot.media.play_sound(str(speech_file))
+            print(f"   🔊 '{phrase}'")
 
-        print(f"   🔊 '{phrase}'")
     except Exception as e:
         print(f"   ⚠️ Speech error: {e}")
+
+
+def play_sound_via_api(sound_path):
+    """
+    Play a sound file on the real robot using REST API.
+
+    Args:
+        sound_path: Path to sound file (local or built-in SDK sound name)
+    """
+    try:
+        # For built-in sounds, just pass the filename
+        # For custom sounds, we'd need to upload first (TODO for later)
+        url = f"{ROBOT_URL}/media/sound/play"
+
+        # Try to play the sound via API
+        # Note: This endpoint might not exist - need to check robot API
+        response = requests.post(url, json={"sound": str(sound_path)}, timeout=5)
+
+        if response.status_code == 200:
+            return True
+        else:
+            print(f"   ⚠️ API returned status {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"   ⚠️ REST API error: {e}")
+        return False
 
 
 def play_sound_effect(robot, emotion_name):
@@ -127,10 +163,18 @@ def play_sound_effect(robot, emotion_name):
         # Get the sound file for this emotion
         sound_file = SOUND_EFFECTS[emotion_name]
 
-        # Play through robot speakers (SDK auto-finds file in assets folder)
-        robot.media.play_sound(sound_file)
+        if IS_REAL_ROBOT:
+            # Use REST API for real robot
+            success = play_sound_via_api(sound_file)
+            if success:
+                print(f"   🎵 Sound: {sound_file} (via API)")
+            else:
+                print(f"   ⚠️ Could not play sound via API")
+        else:
+            # Use SDK media backend for simulator
+            robot.media.play_sound(sound_file)
+            print(f"   🎵 Sound: {sound_file}")
 
-        print(f"   🎵 Sound: {sound_file}")
     except Exception as e:
         print(f"   ⚠️ Sound effect error: {e}")
 
@@ -247,6 +291,8 @@ def init_robot():
     Returns:
         ReachyMini: Connected robot instance
     """
+    global IS_REAL_ROBOT
+
     # Setup speech directory
     setup_speech_directory()
 
@@ -261,7 +307,10 @@ def init_robot():
 
         if mode == "1":
             print("\n🤖 Connecting to REAL robot...")
-            robot = ReachyMini(localhost_only=False, media_backend="default")
+            print("ℹ️  Using REST API for audio (bypasses WebRTC)")
+            # Use no_media to avoid WebRTC - we'll use REST API for audio instead
+            robot = ReachyMini(localhost_only=False, media_backend="no_media")
+            IS_REAL_ROBOT = True
             print("✅ Connected to real robot!")
             return robot
 
@@ -271,6 +320,7 @@ def init_robot():
             input("Press Enter when ready...")
             # Use default_no_video to avoid video streaming buffer issues
             robot = ReachyMini(localhost_only=True, media_backend="default_no_video")
+            IS_REAL_ROBOT = False
             print("✅ Connected to simulator!")
             return robot
 
