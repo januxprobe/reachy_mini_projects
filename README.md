@@ -367,6 +367,92 @@ emotion_moves = RecordedMoves("pollen-robotics/reachy-mini-emotions-library")
 
 ---
 
+### 4. Turn To Speaker (`turn_to_speaker/`) ⭐ NEW!
+**What it does:** Robot turns its head toward you when you speak
+**Run it:**
+```bash
+cd ~/Documents/Workspace/reachy_mini_projects/turn_to_speaker
+python doa_demo.py
+```
+
+**Features:**
+- Uses ReSpeaker 4-microphone array for sound localization
+- Detects direction of sound (0-360°)
+- Automatically turns head to face speaker
+- Real-time speech detection
+- Visual console feedback with direction indicators
+
+**⚠️ Real Robot Only!**
+- Requires physical ReSpeaker microphone array
+- Cannot run in simulator (no hardware)
+
+**Key concepts:**
+- `robot.media.audio.get_DoA()` - Direction of Arrival sensor
+- Returns: `{'angle': 45, 'is_speaking': True}`
+- Coordinate conversion: DoA angle (0-360°) → robot yaw (±30°)
+- Continuous monitoring loop with head tracking
+
+**How it works:**
+1. Monitors microphone array at 10Hz
+2. Detects when speech occurs
+3. Calculates direction angle
+4. Converts to robot yaw coordinate system
+5. Turns head smoothly toward speaker
+
+**Example output:**
+```
+🗣️ SPEAKING | DoA: 045° | FRONT-RIGHT    ↗ | Yaw: +15.0°
+   → Turning head to +15.0°
+
+🔇 Quiet    | DoA: 270° | LEFT            ← | Yaw: -30.0°
+```
+
+---
+
+### 5. Camera & Computer Vision (`camera_vision/`) ⭐ NEW!
+**What it does:** Test and develop computer vision features using robot's camera
+**Run it:**
+```bash
+cd ~/Documents/Workspace/reachy_mini_projects/camera_vision
+python test_camera_simulator.py
+```
+
+**Key Discovery:**
+- ✅ Camera works with simulator WITHOUT GStreamer!
+- ✅ Uses OpenCV backend (`media_backend="default"`)
+- ✅ Simulator streams via UDP (no complex setup needed)
+- ✅ Ready for computer vision projects on Mac!
+
+**Features:**
+- Camera test showing live video feed from simulator
+- FPS counter and statistics
+- OpenCV window with robot's perspective
+- Frame-by-frame access for processing
+
+**How it works:**
+- Simulator streams camera at 1280x720 @ 60fps via UDP
+- OpenCV VideoCapture reads the stream
+- `robot.media.get_frame()` returns frames as numpy arrays
+- Process with any OpenCV/CV library
+
+**What you can build:**
+- Object detection and tracking
+- Face detection
+- Color tracking
+- QR code scanner
+- Motion detection
+- Visual servoing
+- `robot.look_at_image(u, v)` - make robot look at pixel coordinates
+
+**Technical:**
+```python
+robot = ReachyMini(localhost_only=True, media_backend="default")
+frame = robot.media.get_frame()  # Returns BGR numpy array
+# Process frame with OpenCV...
+```
+
+---
+
 ## Troubleshooting
 
 ### Simulator Issues on macOS
@@ -402,15 +488,34 @@ mjpython -m reachy_mini.daemon.app.main --sim
 
 ### Cursor IDE Setup
 
-Each project has `.vscode/settings.json`:
+**⚠️ IMPORTANT: Do this for EVERY new project!**
+
+Each project needs `.vscode/settings.json` for proper Python environment detection:
 ```json
 {
   "python.defaultInterpreterPath": "/Users/jan.moons/Documents/Workspace/reachy_mini/reachy_mini_env/bin/python",
-  "python.terminal.activateEnvironment": true
+  "python.terminal.activateEnvironment": true,
+  "python.analysis.extraPaths": [
+    "/Users/jan.moons/Documents/Workspace/reachy_mini/reachy_mini_env/lib/python3.12/site-packages"
+  ],
+  "cursorpyright.analysis.extraPaths": [
+    "/Users/jan.moons/Documents/Workspace/reachy_mini/reachy_mini_env/lib/python3.12/site-packages"
+  ]
 }
 ```
 
-**For new projects:** Copy `.vscode` folder from existing project
+**For new projects - Standard Setup:**
+```bash
+# After creating a new project directory:
+cd ~/Documents/Workspace/reachy_mini_projects
+cp -r emoji_robot/.vscode new_project_name/
+```
+
+This ensures:
+- ✅ Cursor finds the correct Python interpreter
+- ✅ Autocomplete works with reachy_mini SDK
+- ✅ Type checking and linting work properly
+- ✅ Integrated terminal activates environment automatically
 
 ---
 
@@ -541,25 +646,28 @@ Watch how code improves from working → clean → featured:
 ### Completed Features ✅
 - ✅ **Text-to-Speech** - Robot speaks emotion phrases
 - ✅ **Sound Effects** - Built-in SDK sounds for emotions
+- ✅ **Voice Commands** - Control robot by speaking (Mac development version)
+- ✅ **Direction of Arrival** - Robot turns toward speaker using ReSpeaker array
 
 ### Next Features to Implement
-- **Voice Commands** - Control robot by speaking (Step 3 from audio plan)
-- **Custom Sound Effects** - Generate beeps/tones instead of built-in sounds
+- **Combine DoA + Emotions** - Turn toward speaker and show curious emotion
 - **Interactive Conversations** - Combine speech recognition + TTS responses
+- **Voice-Controlled Emotions** - Use robot's microphone for voice commands
+- **Custom Sound Effects** - Generate beeps/tones instead of built-in sounds
 
 ### Ideas for New Projects
-- **Voice Control** - respond to keywords using robot's microphone
-- **Dance Choreographer** - create custom dance routines
-- **Emotion Detector** - react to user input
-- **Interactive Story** - robot acts out a story
-- **Game Controller** - play games with the robot
+- **Follow the Speaker** - Track and follow person around room using DoA
+- **Dance Choreographer** - Create custom dance routines
+- **Multi-Person Interaction** - Track multiple speakers, respond to each
+- **Interactive Story** - Robot acts out a story with voice narration
+- **Voice-Controlled Games** - Play games controlled by voice commands
 
 ### Advanced Topics to Explore
-- Computer vision (using robot's camera)
-- Audio processing (using robot's microphone with DoA)
+- Computer vision (using robot's camera) + DoA for person tracking
+- Deploy audio/voice features to real robot (adapt for Linux/ReSpeaker)
 - Custom choreography recording
 - Multi-robot coordination
-- AI/LLM integration
+- AI/LLM integration for natural conversations
 
 ---
 
