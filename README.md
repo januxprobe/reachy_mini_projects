@@ -427,13 +427,12 @@ mini.goto_target(antennas=[1.0, -1.0], duration=0.5)  # Opposite
 ### Head Control
 ```python
 from reachy_mini.utils import create_head_pose
-import math
 
-# All angles in radians!
+# All angles in DEGREES (not radians!)
 head = create_head_pose(
-    roll=math.radians(20),   # Tilt sideways: + = right, - = left
-    pitch=math.radians(15),  # Nod: + = up, - = down
-    yaw=math.radians(-30)    # Turn: + = right, - = left
+    roll=20,    # Tilt sideways: + = right, - = left (degrees)
+    pitch=15,   # Nod: + = up, - = down (degrees)
+    yaw=-30     # Turn: + = right, - = left (degrees)
 )
 mini.goto_target(head=head, duration=1.0)
 ```
@@ -468,9 +467,9 @@ duration=1.0  # Slow
 ### Code Organization
 ```python
 # Good - separate functions for each behavior
-def show_happy():
-    head = create_head_pose(0, math.radians(15), 0)
-    mini.goto_target(head=head, antennas=[0.8, 0.8], duration=0.5)
+def show_happy(robot):
+    head = create_head_pose(roll=0, pitch=15, yaw=0)  # Degrees!
+    robot.goto_target(head=head, antennas=[0.8, 0.8], duration=0.5)
 
 # Bad - everything in one long script
 ```
