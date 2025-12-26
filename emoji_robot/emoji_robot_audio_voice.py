@@ -1,8 +1,21 @@
 """
-Emoji Robot - Express Emotions with Reachy Mini
+Emoji Robot with Audio & Voice - Express Emotions with Reachy Mini
 
-A clean, well-structured program that lets you control your robot's emotions.
-Press keys to trigger different emotional expressions!
+Features:
+- Text-to-Speech: Robot speaks emotion phrases
+- Sound Effects: Plays built-in SDK sounds for each emotion
+- Voice Commands: Control robot by speaking (Mac microphone during development)
+- Keyboard Control: Classic h/s/e/c key controls
+
+Development vs Production:
+  This version is optimized for Mac development with simulator.
+
+  For production deployment to robot, see AUDIO_VOICE_PLAN.md for:
+  - Replacing PyAudio (Mac mic) with robot.media recording (ReSpeaker array)
+  - Replacing macOS 'say' command with Linux TTS (espeak/pyttsx3)
+  - Optional: Offline speech recognition (Vosk/Whisper)
+
+  Current code is ~90% portable - only microphone input and TTS need adaptation.
 """
 
 from reachy_mini import ReachyMini
@@ -12,6 +25,7 @@ import os
 import subprocess
 from pathlib import Path
 import requests
+import speech_recognition as sr
 
 
 # ============================================================
@@ -55,6 +69,17 @@ TEMP_SPEECH_DIR = Path(__file__).parent / "temp_speech"
 # Robot connection mode (will be set during initialization)
 IS_REAL_ROBOT = False
 ROBOT_URL = "http://reachy-mini.local:8000"
+
+# Voice command keywords mapped to emotions
+VOICE_KEYWORDS = {
+    'happy': 'happy',
+    'sad': 'sad',
+    'excited': 'excited',
+    'curious': 'curious',
+    'quit': 'quit',
+    'stop': 'quit',
+    'exit': 'quit'
+}
 
 
 # ============================================================
@@ -177,6 +202,72 @@ def play_sound_effect(robot, emotion_name):
 
     except Exception as e:
         print(f"   ⚠️ Sound effect error: {e}")
+
+
+# ============================================================
+# VOICE RECOGNITION FUNCTIONS
+# ============================================================
+
+def listen_for_command(recognizer, microphone, timeout=5):
+    """
+    Listen for a voice command and return recognized text.
+
+    Args:
+        recognizer: SpeechRecognition recognizer instance
+        microphone: SpeechRecognition microphone instance
+        timeout: Maximum seconds to wait for speech
+
+    Returns:
+        str: Recognized text in lowercase, or None if nothing recognized
+    """
+    try:
+        print("🎤 Listening... (speak now)")
+        with microphone as source:
+            # Adjust for ambient noise
+            recognizer.adjust_for_ambient_noise(source, duration=0.5)
+            # Listen for audio
+            audio = recognizer.listen(source, timeout=timeout, phrase_time_limit=3)
+
+        print("🔄 Processing...")
+        # Recognize speech using Google Speech Recognition
+        text = recognizer.recognize_google(audio)
+        print(f"📝 You said: '{text}'")
+        return text.lower()
+
+    except sr.WaitTimeoutError:
+        print("⏱️ No speech detected (timeout)")
+        return None
+    except sr.UnknownValueError:
+        print("❓ Could not understand audio")
+        return None
+    except sr.RequestError as e:
+        print(f"⚠️ Could not request results; {e}")
+        return None
+    except Exception as e:
+        print(f"⚠️ Error: {e}")
+        return None
+
+
+def process_voice_command(text):
+    """
+    Process recognized text and return the emotion command.
+
+    Args:
+        text: Recognized text string
+
+    Returns:
+        str: Emotion name ('happy', 'sad', etc.) or 'quit', or None if no match
+    """
+    if not text:
+        return None
+
+    # Check each word in the recognized text
+    words = text.lower().split()
+    for word in words:
+        if word in VOICE_KEYWORDS:
+            return VOICE_KEYWORDS[word]
+
+    return None
 
 
 # ============================================================
@@ -332,13 +423,8 @@ def init_robot():
 # MAIN PROGRAM
 # ============================================================
 
-def main():
-    """Main program loop - handles user input and emotion selection."""
-    # Initialize robot
-    robot = init_robot()
-
-    # Display menu
-    print("\n🤖 Robot is ready to show emotions!")
+def run_keyboard_mode(robot):
+    """Run robot in keyboard control mode."""
     print(EMOTION_MENU)
 
     # Emotion mapping
@@ -349,27 +435,108 @@ def main():
         'c': show_curious
     }
 
-    # Main interaction loop
-    try:
-        while True:
-            user_input = input("Choose emotion (h/s/e/c/q): ").lower().strip()
+    # Keyboard interaction loop
+    while True:
+        user_input = input("Choose emotion (h/s/e/c/q): ").lower().strip()
 
-            if user_input == 'q':
-                print("\n👋 Goodbye!")
-                print("Disconnecting robot...")
-                os._exit(0)
+        if user_input == 'q':
+            return False  # Exit program
 
-            elif user_input in emotions:
-                emotions[user_input](robot)
-                print()  # Empty line for readability
+        elif user_input in emotions:
+            emotions[user_input](robot)
+            print()  # Empty line for readability
 
-            else:
-                print("❌ Invalid choice! Try h, s, e, c, or q")
+        else:
+            print("❌ Invalid choice! Try h, s, e, c, or q")
 
-    except KeyboardInterrupt:
-        print("\n\n👋 Goodbye!")
-        print("Disconnecting robot...")
-        os._exit(0)
+
+def run_voice_mode(robot):
+    """Run robot in voice command mode."""
+    print("\n🎤 Voice Command Mode")
+    print("=" * 50)
+    print("Say one of these commands:")
+    print("  - 'happy' or 'sad' or 'excited' or 'curious'")
+    print("  - 'quit' or 'stop' or 'exit' to end")
+    print("=" * 50)
+    print()
+
+    # Emotion mapping
+    emotion_functions = {
+        'happy': show_happy,
+        'sad': show_sad,
+        'excited': show_excited,
+        'curious': show_curious
+    }
+
+    # Initialize speech recognizer and microphone
+    recognizer = sr.Recognizer()
+    microphone = sr.Microphone()
+
+    print("🔧 Initializing microphone...")
+    time.sleep(1)
+    print("✅ Ready!")
+    print()
+
+    # Voice command loop
+    while True:
+        # Listen for command
+        text = listen_for_command(recognizer, microphone, timeout=5)
+
+        # Process command
+        command = process_voice_command(text)
+
+        if command == 'quit':
+            print("\n👋 Voice command 'quit' detected!")
+            return False  # Exit program
+
+        elif command in emotion_functions:
+            print(f"✅ Executing: {command.upper()}")
+            emotion_functions[command](robot)
+            print()
+
+        elif text:
+            print(f"⚠️ No emotion keyword found in: '{text}'")
+            print("Try saying: happy, sad, excited, or curious")
+            print()
+
+
+def main():
+    """Main program loop - handles user input and emotion selection."""
+    # Initialize robot
+    robot = init_robot()
+
+    # Choose control mode
+    print("\n🎮 Choose control mode:")
+    print("  1 - Keyboard control (h/s/e/c keys)")
+    print("  2 - Voice commands (speak emotions)")
+    print()
+
+    while True:
+        control_mode = input("Enter 1 or 2: ").strip()
+
+        if control_mode == "1":
+            print("\n⌨️ Keyboard Control Mode")
+            print("🤖 Robot is ready to show emotions!")
+            try:
+                run_keyboard_mode(robot)
+                break
+            except KeyboardInterrupt:
+                print("\n\n👋 Goodbye!")
+                break
+
+        elif control_mode == "2":
+            try:
+                run_voice_mode(robot)
+                break
+            except KeyboardInterrupt:
+                print("\n\n👋 Goodbye!")
+                break
+
+        else:
+            print("❌ Invalid choice! Enter 1 or 2")
+
+    print("Disconnecting robot...")
+    os._exit(0)
 
 
 # ============================================================
