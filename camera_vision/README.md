@@ -133,28 +133,36 @@ while True:
 - Uses hardware camera calibration
 - Lens distortion correction available
 
+## Current Status
+
+**✅ Completed Features:**
+- Feature 1: Face detection with emotions and speech
+- Feature 2: Expressive antenna behaviors for all emotions
+
+**⏸️ Deferred Features:**
+- Face Recognition (Feature 3) - Heavy dependencies, better suited after real robot validation
+- Emotion Detection (Feature 4) - Requires ML models, deferred pending hardware testing
+- Multi-Person Tracking (Feature 5) - Future consideration after validating core features
+
+**🎯 Next Steps:**
+Ready for deployment and testing on real Reachy robot hardware!
+
 ## What You Can Build
 
-Now that camera works, you can create:
+With the current tech stack (OpenCV + Reachy SDK), you can create:
 
-### Computer Vision Projects
-- **Object Detection** - Detect and track objects
-- **Face Detection** - Make robot look at faces
+### Recommended Projects (Real Robot Compatible)
+- **Face Tracking** - Make robot look at faces ✅ (implemented)
 - **Color Tracking** - Follow colored objects
 - **QR Code Scanner** - Read QR codes
 - **Motion Detection** - Detect movement
+- **ArUco Markers** - Precise positioning and tracking
 
-### Interactive Demos
-- **Visual Following** - Track and follow objects with head
-- **Look At Point** - Use `robot.look_at_image(u, v)` for pixel tracking
-- **Visual Search** - Scan environment for targets
-- **Gesture Recognition** - React to hand gestures
-
-### Educational Projects
-- **Camera Calibration** - Understand camera intrinsics
-- **Image Processing** - Apply filters and transformations
-- **Feature Detection** - SIFT, ORB, etc.
-- **Neural Networks** - Run inference on camera feed
+### Advanced Projects (Consider Hardware Constraints)
+- **Object Detection** - May need lightweight models
+- **Gesture Recognition** - Depends on complexity
+- **Face Recognition** - Requires additional dependencies
+- **Neural Networks** - Need to evaluate performance on robot hardware
 
 ## Technical Details
 

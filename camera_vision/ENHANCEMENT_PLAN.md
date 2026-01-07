@@ -105,7 +105,7 @@ python face_tracking_with_emotions_and_speech.py --headless
 ---
 
 ### Feature 3: Face Recognition 🔍
-**Status:** ⏳ Pending
+**Status:** ⏸️ DEFERRED
 
 **Goal:** Recognize specific people and respond differently
 
@@ -123,12 +123,21 @@ python face_tracking_with_emotions_and_speech.py --headless
 **Requirements:**
 ```bash
 pip install face_recognition
+# Plus system dependencies: cmake, dlib, etc.
 ```
+
+**Decision:** Deferred due to deployment concerns on real robot:
+- Heavy computational requirements (dlib/face_recognition)
+- Complex dependencies not easily installed on robot
+- Performance concerns on robot's hardware
+- Better suited for development after testing simpler features on real robot first
+
+**Alternative:** Could revisit with lightweight alternatives or cloud-based recognition
 
 ---
 
 ### Feature 4: Emotion Detection 😊
-**Status:** ⏳ Pending
+**Status:** ⏸️ DEFERRED
 
 **Goal:** Detect if person is smiling and respond
 
@@ -138,15 +147,20 @@ pip install face_recognition
 - Playful interaction
 
 **Technical:**
-- Use OpenCV smile detection cascade
-- Or use deep learning model (DeepFace)
+- Use OpenCV smile detection cascade (simpler)
+- Or use deep learning model (DeepFace) (more accurate but heavier)
 - Classify facial expressions
 - Robot responds with matching emotion
+
+**Decision:** Deferred for similar reasons as Feature 3:
+- Deep learning models would be heavy for robot hardware
+- OpenCV cascade less reliable than face detection
+- Better to validate existing features on real robot first
 
 ---
 
 ### Feature 5: Multi-Person Tracking 👥
-**Status:** ⏳ Pending
+**Status:** 💡 FUTURE CONSIDERATION
 
 **Goal:** Track multiple people with priorities
 
@@ -158,9 +172,11 @@ pip install face_recognition
 
 **Technical:**
 - Track all detected faces
-- Assign IDs to faces
+- Assign IDs to faces (without recognition, just tracking)
 - Implement attention switching logic
-- Remember who was already greeted
+- Remember who was already greeted in current session
+
+**Note:** This could be implemented with current tech stack (OpenCV only), but deferred to focus on validating existing features on real robot first. Multi-person tracking logic could be complex and is better added after confirming single-person interactions work well in practice.
 
 ---
 
@@ -232,6 +248,9 @@ Future:
 - ✅ Created three antenna gesture functions (greeting wave, happy bounce, sad droop)
 - ✅ Integrated antenna behaviors with complete emotion sequences
 - ✅ CURIOUS: alternating wave, HAPPY: excited bounce, SAD: slow droop
+- ✅ Deferred Features 3-5 due to real robot deployment concerns
+- ✅ Focus on validating current features on real hardware before adding complexity
+- ✅ Prioritized features that work well with current tech stack (OpenCV, no heavy ML)
 
 **December 26, 2025:**
 - ✅ Use webcam for face detection (not simulator camera)
@@ -245,14 +264,27 @@ Future:
 
 ---
 
-## Next Session Tasks
+## Next Steps
 
-**Current:** Feature 3 - Face Recognition
-- [ ] Install face_recognition library
-- [ ] Create face encoding storage system
-- [ ] Implement person-specific responses
-- [ ] Build training/enrollment workflow
-- [ ] Test recognition accuracy
+**Completed Features:**
+- ✅ Feature 1: Emoji Robot Integration + Speech
+- ✅ Feature 2: Antenna Behaviors for All Emotions
+
+**Deferred Features (for post-real-robot validation):**
+- ⏸️ Feature 3: Face Recognition (heavy dependencies)
+- ⏸️ Feature 4: Emotion Detection (heavy dependencies)
+- 💡 Feature 5: Multi-Person Tracking (future consideration)
+
+**Recommended Next Steps:**
+1. **Deploy to Real Robot** - Test current features (1 & 2) on actual hardware
+2. **Performance Tuning** - Optimize for robot's computational constraints
+3. **Real-world Testing** - Validate behaviors in actual use cases
+4. **Consider Alternatives** - If recognition needed, explore lightweight options
+
+**Future Development Path:**
+- After validating on real robot, could revisit deferred features
+- Consider cloud-based recognition as alternative to on-device processing
+- Focus on features that enhance existing capabilities without heavy compute
 
 **Previous Sessions:**
 - ✅ Feature 1: Emoji Robot Integration + Speech (December 26, 2025)
@@ -276,6 +308,9 @@ Future:
 - ✅ Standardized naming pattern: antennas_<emotion>_<action>()
 - ✅ Integrated antenna behaviors with all three emotions
 - ✅ Complete expressive sequences for each emotion
+- ✅ Evaluated Feature 3-5 for real robot deployment
+- ✅ Decided to defer advanced features pending real robot testing
+- ✅ Updated documentation with deployment considerations
 
 ---
 
