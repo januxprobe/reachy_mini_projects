@@ -30,18 +30,28 @@ This project demonstrates that we **CAN** use the camera with the simulator on M
 ### 1. Camera Test (`test_camera_simulator.py`)
 Basic camera functionality test - verifies camera works with simulator.
 
-### 2. Face Detection Demo (`face_detection_demo.py`) ⭐
+### 2. Face Detection Demo (`face_detection_demo.py`)
 Interactive face tracking - robot detects and looks at faces!
 - Real-time face detection using Haar Cascades
 - Robot head automatically tracks largest face
 - Visual feedback with bounding boxes
 - See `FACE_DETECTION.md` for full documentation
 
-## Running the Camera Test
+### 3. Face Tracking with Emotions & Speech (`face_tracking_with_emotions_and_speech.py`) ⭐
+Complete interactive robot behavior with emotions and speech!
+- Real-time face detection and head tracking
+- Emotion expressions (CURIOUS, HAPPY, SAD)
+- Text-to-speech responses
+- Integrated with emoji_robot for expressive movements
+- **Headless mode available for better performance**
+- See `ENHANCEMENT_PLAN.md` for full details
+
+## Running the Projects
 
 ### Prerequisites
 1. Simulator must be running in another terminal
 2. OpenCV installed (included in reachy_mini_env)
+3. ffmpeg installed (for speech synthesis)
 
 ### Steps
 
@@ -50,18 +60,41 @@ Interactive face tracking - robot detects and looks at faces!
 reachy-sim
 ```
 
-**Terminal 2 - Run camera test:**
+**Terminal 2 - Run a demo:**
+
+**Basic Camera Test:**
 ```bash
-reachy
 cd ~/Documents/Workspace/reachy_mini_projects/camera_vision
 python test_camera_simulator.py
 ```
 
+**Face Tracking with Emotions & Speech (Recommended):**
+```bash
+cd ~/Documents/Workspace/reachy_mini_projects/camera_vision
+
+# With display window (shows camera feed)
+python face_tracking_with_emotions_and_speech.py
+
+# Headless mode (better performance, no display)
+python face_tracking_with_emotions_and_speech.py --headless
+```
+
 ### What You'll See
+
+**Camera Test:**
 - OpenCV window showing simulator camera view
 - FPS counter and frame count overlay
 - Real-time video feed from robot's perspective
 - Press 'q' to quit
+
+**Face Tracking with Emotions:**
+- Robot detects and tracks your face with head movements
+- Shows CURIOUS emotion + says "Hello! Who are you?" when it first sees you
+- Shows HAPPY emotion + says "I'm so happy to see you!" after 3 seconds
+- Shows SAD emotion + says "Goodbye! Come back soon!" when you leave
+- Press 'q' to quit (or Ctrl+C in headless mode)
+
+**Performance Tip:** Use `--headless` flag if the display window slows down your system. The robot will still work perfectly without showing the camera feed on screen.
 
 ## Code Structure
 

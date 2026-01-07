@@ -16,6 +16,7 @@ Perfect for: Interactive demonstrations, testing emotion + speech integration
 import sys
 import os
 import subprocess
+import argparse
 from pathlib import Path
 
 # Add emoji_robot to path so we can import emotion functions
@@ -276,6 +277,16 @@ class EmotionStateMachine:
         self.was_face_detected = self.face_detected
         self.face_detected = faces_detected
 
+        # Track face appearance/disappearance regardless of cooldown
+        # Face just appeared - initialize timers
+        if self.face_detected and not self.was_face_detected:
+            self.face_first_seen_time = current_time
+            self.face_last_seen_time = current_time
+
+        # Face still present - update timer
+        if self.face_detected:
+            self.face_last_seen_time = current_time
+
         # Don't trigger emotions if one is in progress or too soon
         if self.emotion_in_progress:
             return self.state
@@ -283,19 +294,14 @@ class EmotionStateMachine:
         if current_time - self.last_emotion_time < EMOTION_COOLDOWN:
             return self.state
 
-        # Face just appeared (CURIOUS)
+        # Trigger CURIOUS when face first appears
         if self.face_detected and not self.was_face_detected:
-            self.face_first_seen_time = current_time
-            self.face_last_seen_time = current_time
             self._trigger_emotion("CURIOUS")
             print("👀 New face detected! Showing CURIOUS emotion...")
             return self.state
 
-        # Face still present - update timer
-        if self.face_detected:
-            self.face_last_seen_time = current_time
-
-            # Face been there a while (HAPPY)
+        # Face been there a while (HAPPY)
+        if self.face_detected and self.face_first_seen_time is not None:
             time_since_first_seen = current_time - self.face_first_seen_time
             if (time_since_first_seen >= HAPPY_TRIGGER_TIME and
                 self.state != "HAPPY"):
@@ -350,15 +356,19 @@ class EmotionStateMachine:
 # MAIN DEMO LOOP
 # ============================================================
 
-def run_face_tracking_with_emotions(robot, webcam):
+def run_face_tracking_with_emotions(robot, webcam, headless=False):
     """Main demo loop with emotions."""
     print("\n🎭 Initializing face detector...")
     face_cascade = init_face_detector()
     print("✅ Face detector ready!")
 
     print("\n📷 Starting face tracking with emotions...")
-    print("   Look at your webcam and watch robot respond!")
-    print("   Press 'q' to quit\n")
+    if headless:
+        print("   Running in HEADLESS mode (no display window)")
+        print("   Press Ctrl+C to quit\n")
+    else:
+        print("   Look at your webcam and watch robot respond!")
+        print("   Press 'q' to quit\n")
 
     # Initialize emotion state machine
     emotion_machine = EmotionStateMachine(robot)
@@ -396,15 +406,17 @@ def run_face_tracking_with_emotions(robot, webcam):
             elapsed = time.time() - start_time
             fps = frame_count / elapsed if elapsed > 0 else 0
 
-            # Draw face detections
-            frame = draw_face_detection(frame, faces, emotion_state)
+            # Only draw if not in headless mode
+            if not headless:
+                # Draw face detections
+                frame = draw_face_detection(frame, faces, emotion_state)
 
-            # Add overlay info
-            cv2.putText(frame, f"Faces: {len(faces)}", (10, 30), FONT, 0.7, TEXT_COLOR, 2)
-            cv2.putText(frame, f"FPS: {fps:.1f}", (10, 60), FONT, 0.6, TEXT_COLOR, 2)
-            cv2.putText(frame, f"Robot Yaw: {current_yaw:+.1f}°", (10, 90), FONT, 0.6, TEXT_COLOR, 2)
-            cv2.putText(frame, "State: " + emotion_state, (10, 120), FONT, 0.6, (255, 255, 0), 2)
-            cv2.putText(frame, "Press 'q' to quit", (10, frame_height - 20), FONT, 0.6, TEXT_COLOR, 2)
+                # Add overlay info
+                cv2.putText(frame, f"Faces: {len(faces)}", (10, 30), FONT, 0.7, TEXT_COLOR, 2)
+                cv2.putText(frame, f"FPS: {fps:.1f}", (10, 60), FONT, 0.6, TEXT_COLOR, 2)
+                cv2.putText(frame, f"Robot Yaw: {current_yaw:+.1f}°", (10, 90), FONT, 0.6, TEXT_COLOR, 2)
+                cv2.putText(frame, "State: " + emotion_state, (10, 120), FONT, 0.6, (255, 255, 0), 2)
+                cv2.putText(frame, "Press 'q' to quit", (10, frame_height - 20), FONT, 0.6, TEXT_COLOR, 2)
 
             # Track largest face (only when not showing emotion)
             if faces_detected and not emotion_machine.emotion_in_progress:
@@ -421,13 +433,17 @@ def run_face_tracking_with_emotions(robot, webcam):
                 else:
                     current_yaw = target_yaw
 
-            # Display webcam feed
-            cv2.imshow("Face Tracking with Emotions", frame)
+            # Display webcam feed (only if not headless)
+            if not headless:
+                cv2.imshow("Face Tracking with Emotions", frame)
 
-            # Check for quit
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                print("\n👋 Quitting...")
-                break
+                # Check for quit
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    print("\n👋 Quitting...")
+                    break
+            else:
+                # In headless mode, just a small delay to prevent busy loop
+                time.sleep(0.01)
 
     except KeyboardInterrupt:
         print("\n\n👋 Interrupted by user")
@@ -483,9 +499,15 @@ def init_robot():
 
 def main():
     """Main program."""
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Face tracking with emotions and speech')
+    parser.add_argument('--headless', action='store_true',
+                        help='Run without display window (better performance)')
+    args = parser.parse_args()
+
     robot = init_robot()
     webcam = init_webcam()
-    run_face_tracking_with_emotions(robot, webcam)
+    run_face_tracking_with_emotions(robot, webcam, headless=args.headless)
     print("\nDisconnecting...")
 
 
