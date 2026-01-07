@@ -68,9 +68,11 @@ python emoji_robot.py
 ├── reachy_mini/              # SDK installation & virtual environment
 │   └── reachy_mini_env/      # Virtual environment
 └── reachy_mini_projects/     # Your projects (this folder)
-    ├── helloworld/
-    ├── emoji_robot/
-    └── choreography_demo/
+    ├── helloworld/           # Basic antenna wiggle demo
+    ├── emoji_robot/          # Emotion expressions with voice
+    ├── choreography_demo/    # Dance moves with music
+    ├── turn_to_speaker/      # Direction of arrival (DoA) demo
+    └── camera_vision/        # Computer vision & face tracking
 ```
 
 ### What's Installed
@@ -409,47 +411,78 @@ python doa_demo.py
 
 ---
 
-### 5. Camera & Computer Vision (`camera_vision/`) ⭐ NEW!
-**What it does:** Test and develop computer vision features using robot's camera
-**Run it:**
+### 5. Camera & Computer Vision (`camera_vision/`) ⭐ COMPLETE!
+**What it does:** Interactive robot with face tracking, emotions, speech, and expressive antenna gestures
+
+**Available Programs:**
+
+#### Face Tracking with Greetings (`face_tracking_with_emotions_and_speech.py`)
 ```bash
 cd ~/Documents/Workspace/reachy_mini_projects/camera_vision
-python test_camera_simulator.py
+
+# With display window (shows camera feed)
+python face_tracking_with_emotions_and_speech.py
+
+# Headless mode (better performance, no display)
+python face_tracking_with_emotions_and_speech.py --headless
 ```
 
-**Key Discovery:**
-- ✅ Camera works with simulator WITHOUT GStreamer!
-- ✅ Uses OpenCV backend (`media_backend="default"`)
-- ✅ Simulator streams via UDP (no complex setup needed)
-- ✅ Ready for computer vision projects on Mac!
+**✅ Implemented Features:**
+- **Feature 1:** Face detection with emotions and speech
+- **Feature 2:** Expressive antenna behaviors for all emotions
 
-**Features:**
-- Camera test showing live video feed from simulator
-- FPS counter and statistics
-- OpenCV window with robot's perspective
-- Frame-by-frame access for processing
+**Complete Interaction Sequences:**
+1. **CURIOUS** (First Detection):
+   - 👋 Wave antennas in alternating pattern
+   - 🔊 Say "Hello! Who are you?"
+   - 🤔 Show curious emotion (head tilt)
 
-**How it works:**
-- Simulator streams camera at 1280x720 @ 60fps via UDP
-- OpenCV VideoCapture reads the stream
-- `robot.media.get_frame()` returns frames as numpy arrays
-- Process with any OpenCV/CV library
+2. **HAPPY** (Person Stays 3+ Seconds):
+   - 😊 Bounce antennas excitedly
+   - 🔊 Say "I'm so happy to see you!"
+   - 😊 Show happy emotion (look up)
 
-**What you can build:**
-- Object detection and tracking
-- Face detection
-- Color tracking
-- QR code scanner
-- Motion detection
-- Visual servoing
-- `robot.look_at_image(u, v)` - make robot look at pixel coordinates
+3. **SAD** (Person Leaves):
+   - 🔊 Say "Goodbye! Come back soon!"
+   - 😢 Droop antennas slowly
+   - 😢 Show sad emotion (look down)
+
+**Key Features:**
+- Real-time face detection with OpenCV Haar Cascades (20-30 FPS)
+- Head tracking follows largest face
+- Emotion state machine with 5-second cooldown
+- Text-to-speech using macOS `say` + ffmpeg
+- Three expressive antenna behaviors with consistent naming
+- Headless mode for better performance
+
+**⏸️ Deferred Features:**
+- Face Recognition (Feature 3) - Heavy dependencies, deferred
+- Emotion Detection (Feature 4) - ML models, deferred
+- Multi-Person Tracking (Feature 5) - Future consideration
+
+**Decision:** Deferred advanced features to validate existing ones on real robot hardware first. Focus on lightweight OpenCV-based features that work well without heavy ML dependencies.
 
 **Technical:**
 ```python
-robot = ReachyMini(localhost_only=True, media_backend="default")
-frame = robot.media.get_frame()  # Returns BGR numpy array
-# Process frame with OpenCV...
+# Face detection
+robot = ReachyMini(localhost_only=True, media_backend="default_no_video")
+webcam = cv2.VideoCapture(0)  # Uses Mac webcam for development
+faces = face_cascade.detectMultiScale(gray)
+
+# Antenna behaviors (consistent naming: antennas_<emotion>_<action>)
+antennas_curious_wave(robot)   # Alternating wave greeting
+antennas_happy_bounce(robot)   # Excited synchronized bouncing
+antennas_sad_droop(robot)      # Slow wilting motion
+
+# Speech synthesis
+generate_speech("Hello! Who are you?", "curious")
+robot.media.play_sound(wav_file)
 ```
+
+**See Also:**
+- Full documentation: `camera_vision/README.md`
+- Enhancement plan: `camera_vision/ENHANCEMENT_PLAN.md`
+- Face detection details: `camera_vision/FACE_DETECTION.md`
 
 ---
 
@@ -641,35 +674,60 @@ Watch how code improves from working → clean → featured:
 
 ---
 
-## Next Steps
+## Project Status & Next Steps
 
-### Completed Features ✅
-- ✅ **Text-to-Speech** - Robot speaks emotion phrases
-- ✅ **Sound Effects** - Built-in SDK sounds for emotions
-- ✅ **Voice Commands** - Control robot by speaking (Mac development version)
-- ✅ **Direction of Arrival** - Robot turns toward speaker using ReSpeaker array
+### ✅ Completed Projects
+1. **Hello World** - Basic antenna control
+2. **Emoji Robot** - Emotions with voice and sound effects
+3. **Dance Demo** - Choreographed dance with music
+4. **Turn to Speaker** - Direction of arrival tracking
+5. **Camera Vision** - Face tracking with emotions, speech, and antenna gestures
+   - Feature 1: Face detection with emotions and speech
+   - Feature 2: Expressive antenna behaviors for all emotions
 
-### Next Features to Implement
-- **Combine DoA + Emotions** - Turn toward speaker and show curious emotion
-- **Interactive Conversations** - Combine speech recognition + TTS responses
-- **Voice-Controlled Emotions** - Use robot's microphone for voice commands
-- **Custom Sound Effects** - Generate beeps/tones instead of built-in sounds
+### 🎯 Current Focus: Real Robot Deployment
+**Priority:** Test and validate completed features on real Reachy robot hardware before adding complexity
 
-### Ideas for New Projects
-- **Follow the Speaker** - Track and follow person around room using DoA
-- **Dance Choreographer** - Create custom dance routines
-- **Multi-Person Interaction** - Track multiple speakers, respond to each
-- **Interactive Story** - Robot acts out a story with voice narration
-- **Voice-Controlled Games** - Play games controlled by voice commands
+**Why:** Ensure existing features work well in practice before pursuing advanced features that may have:
+- Heavy computational requirements
+- Complex dependencies not easily installed on robot
+- Performance concerns on robot's hardware
 
-### Advanced Topics to Explore
-- Computer vision (using robot's camera) + DoA for person tracking
-- Deploy audio/voice features to real robot (adapt for Linux/ReSpeaker)
-- Custom choreography recording
-- Multi-robot coordination
-- AI/LLM integration for natural conversations
+### ⏸️ Deferred Features (Post Real Robot Validation)
+- **Face Recognition** - Requires dlib/face_recognition (heavy dependencies)
+- **Emotion Detection** - Requires ML models
+- **Multi-Person Tracking** - Complex state management
+
+### 💡 Future Enhancement Ideas
+- **Combine DoA + Face Tracking** - Turn toward speaker and track face
+- **Interactive Conversations** - Speech recognition + TTS responses
+- **Follow the Speaker** - Track and follow person using DoA + vision
+- **Voice-Controlled Games** - Interactive voice games
+- **Custom Choreography** - Record and play custom dance sequences
+- **AI/LLM Integration** - Natural conversation capabilities
+
+### 🔍 Alternative Approaches to Consider
+- **Lightweight Computer Vision** - Continue with OpenCV-based features
+- **Cloud-Based Recognition** - Offload heavy processing to cloud services
+- **ArUco Markers** - Precise positioning without heavy ML
+- **Color/Motion Tracking** - Simple but effective tracking methods
 
 ---
 
-*Last updated: December 26, 2025*
+## Summary
+
+This repository contains a complete suite of interactive demos for Reachy Mini, progressing from basic control to advanced computer vision:
+
+1. **Basic Movement** - Antenna and head control fundamentals
+2. **Emotions** - Expressive behaviors with voice and sound
+3. **Audio** - Speech synthesis, sound effects, and voice commands
+4. **Spatial Awareness** - Direction of arrival tracking
+5. **Computer Vision** - Face tracking with personalized interactions
+
+**Development Strategy:** Build iteratively, test thoroughly in simulator, validate on real hardware before adding complexity.
+
+---
+
+*Last updated: January 7, 2026*
 *Reachy Mini SDK Version: 1.2.4*
+*Status: Camera vision features complete, ready for real robot deployment*
