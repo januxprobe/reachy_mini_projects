@@ -37,9 +37,10 @@ Interactive face tracking - robot detects and looks at faces!
 - Visual feedback with bounding boxes
 - See `FACE_DETECTION.md` for full documentation
 
-### 3. Face Tracking with Emotions & Speech (`face_tracking_with_emotions_and_speech.py`) ⭐
-Complete interactive robot behavior with emotions and speech!
+### 3. Face Tracking with Greetings (`face_tracking_with_emotions_and_speech.py`) ⭐
+Complete interactive robot behavior with greetings, emotions, and speech!
 - Real-time face detection and head tracking
+- **Antenna greeting waves** when detecting someone
 - Emotion expressions (CURIOUS, HAPPY, SAD)
 - Text-to-speech responses
 - Integrated with emoji_robot for expressive movements
@@ -87,8 +88,12 @@ python face_tracking_with_emotions_and_speech.py --headless
 - Real-time video feed from robot's perspective
 - Press 'q' to quit
 
-**Face Tracking with Emotions:**
+**Face Tracking with Greetings:**
 - Robot detects and tracks your face with head movements
+- **Expressive antenna gestures** for all emotions:
+  - 👋 Waves antennas in greeting when it first sees you
+  - 😊 Bounces antennas excitedly when you stay
+  - 😢 Droops antennas sadly when you leave
 - Shows CURIOUS emotion + says "Hello! Who are you?" when it first sees you
 - Shows HAPPY emotion + says "I'm so happy to see you!" after 3 seconds
 - Shows SAD emotion + says "Goodbye! Come back soon!" when you leave

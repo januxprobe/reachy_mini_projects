@@ -65,20 +65,42 @@ python face_tracking_with_emotions_and_speech.py --headless
 
 ---
 
-### Feature 2: Greeting Behavior 👋
-**Status:** ⏳ Pending
+### Feature 2: Antenna Behaviors for All Emotions 👋
+**Status:** ✅ COMPLETED
 
-**Goal:** Robot waves antennas when seeing someone
+**Goal:** Robot uses expressive antenna gestures for all emotions
 
 **Behaviors:**
-- Wiggle antennas when first detecting face
-- Different antenna patterns for different scenarios
-- Combine with curious emotion
+- **CURIOUS:** Waves antennas in friendly greeting pattern (alternating wave)
+- **HAPPY:** Bounces antennas excitedly (synchronized bouncing)
+- **SAD:** Droops antennas slowly (wilting motion)
 
 **Implementation:**
-- Add antenna wave function
-- Trigger on new face detection
-- Smooth antenna movements
+✅ Created `antennas_curious_wave()` function - alternating wave for greeting
+✅ Created `antennas_happy_bounce()` function - excited bouncing motion
+✅ Created `antennas_sad_droop()` function - slow wilting motion
+✅ Integrated all antenna behaviors with emotion state machine
+✅ Each emotion now has complete sequence: antenna gesture → speech → emotion display
+✅ Consistent naming pattern: `antennas_<emotion>_<action>()`
+
+**Behavior Flows:**
+
+**CURIOUS (First Detection):**
+1. 👋 Wave antennas (3 alternating waves, ~0.9 seconds)
+2. 🔊 Say "Hello! Who are you?"
+3. 🤔 Show curious emotion (head tilt)
+
+**HAPPY (Person Stays 3+ Seconds):**
+1. 😊 Bounce antennas (3 excited bounces, ~1.2 seconds)
+2. 🔊 Say "I'm so happy to see you!"
+3. 😊 Show happy emotion (look up, antennas raised)
+
+**SAD (Person Leaves):**
+1. 🔊 Say "Goodbye! Come back soon!"
+2. 😢 Droop antennas slowly (wilting motion, ~1.5 seconds)
+3. 😢 Show sad emotion (look down, antennas droopy)
+
+**Completed:** January 7, 2026
 
 ---
 
@@ -206,6 +228,10 @@ Future:
 - ✅ Fixed bug: Timer initialization now happens before cooldown check
 - ✅ Tested Feature 1 completely - all behaviors working as expected
 - ✅ Headless mode uses --headless flag, controlled via argparse
+- ✅ Implemented Feature 2: Antenna behaviors for all emotions
+- ✅ Created three antenna gesture functions (greeting wave, happy bounce, sad droop)
+- ✅ Integrated antenna behaviors with complete emotion sequences
+- ✅ CURIOUS: alternating wave, HAPPY: excited bounce, SAD: slow droop
 
 **December 26, 2025:**
 - ✅ Use webcam for face detection (not simulator camera)
@@ -221,13 +247,12 @@ Future:
 
 ## Next Session Tasks
 
-**Current:** Feature 2 - Antenna Greeting Behavior
-- [ ] Create face_tracking_with_greetings.py (or enhance existing)
-- [ ] Add antenna wave function
-- [ ] Trigger antenna greeting on new face detection
-- [ ] Combine with curious emotion
-- [ ] Test antenna patterns
-- [ ] Document behavior
+**Current:** Feature 3 - Face Recognition
+- [ ] Install face_recognition library
+- [ ] Create face encoding storage system
+- [ ] Implement person-specific responses
+- [ ] Build training/enrollment workflow
+- [ ] Test recognition accuracy
 
 **Previous Sessions:**
 - ✅ Feature 1: Emoji Robot Integration + Speech (December 26, 2025)
@@ -244,6 +269,13 @@ Future:
 - ✅ Added headless mode for better performance
 - ✅ Documented headless mode option
 - ✅ Verified all emotion triggers working correctly
+- ✅ Implemented Feature 2: Antenna behaviors for all emotions
+- ✅ Created antennas_curious_wave() - alternating wave for CURIOUS
+- ✅ Created antennas_happy_bounce() - excited bouncing for HAPPY
+- ✅ Created antennas_sad_droop() - wilting motion for SAD
+- ✅ Standardized naming pattern: antennas_<emotion>_<action>()
+- ✅ Integrated antenna behaviors with all three emotions
+- ✅ Complete expressive sequences for each emotion
 
 ---
 

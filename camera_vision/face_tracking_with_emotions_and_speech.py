@@ -1,16 +1,17 @@
 """
-Face Tracking with Emotions AND Speech - Interactive Robot Behavior
+Face Tracking with Emotions, Speech, AND Antenna Greetings - Interactive Robot Behavior
 
-This demo combines face detection with emoji robot emotions AND speech,
+This demo combines face detection with emoji robot emotions, speech, and antenna greetings,
 creating a fully interactive and expressive robot that responds to people.
 
 Behaviors:
+- Waves antennas in greeting pattern when first detecting face
 - Shows CURIOUS emotion + says "Hello! Who are you?" when first detecting face
 - Shows HAPPY emotion + says "I'm so happy to see you!" when person stays
 - Shows SAD emotion + says "Goodbye! Come back soon!" when person leaves
 - Tracks face with head movements continuously
 
-Perfect for: Interactive demonstrations, testing emotion + speech integration
+Perfect for: Interactive demonstrations, testing emotion + speech + antenna greeting integration
 """
 
 import sys
@@ -37,7 +38,8 @@ import numpy as np
 
 BANNER = """
 ==================================================
-REACHY MINI - FACE TRACKING WITH EMOTIONS & SPEECH
+REACHY MINI - FACE TRACKING WITH GREETINGS
+Emotions + Speech + Antenna Waves!
 ==================================================
 """
 
@@ -247,6 +249,102 @@ def play_speech_for_emotion(robot, emotion_name):
 
 
 # ============================================================
+# ANTENNA BEHAVIORS
+# ============================================================
+
+def antennas_curious_wave(robot):
+    """
+    Wave antennas in a friendly greeting pattern for curious emotion.
+
+    Creates an enthusiastic, welcoming wave by alternating antenna positions
+    in a quick, energetic pattern.
+
+    Args:
+        robot: ReachyMini robot instance
+    """
+    try:
+        # Quick alternating wave pattern (3 waves)
+        for _ in range(3):
+            # Wave up (left up, right down)
+            robot.goto_target(antennas=[0.9, -0.5], duration=0.15)
+            time.sleep(0.15)
+
+            # Wave alternate (left down, right up)
+            robot.goto_target(antennas=[-0.5, 0.9], duration=0.15)
+            time.sleep(0.15)
+
+        # Return to neutral
+        robot.goto_target(antennas=[0, 0], duration=0.2)
+        time.sleep(0.2)
+
+        print("   👋 Curious antenna wave completed!")
+
+    except Exception as e:
+        print(f"   ⚠️ Curious antenna error: {e}")
+
+
+def antennas_happy_bounce(robot):
+    """
+    Bounce antennas excitedly for happy emotion.
+
+    Creates a joyful, bouncy pattern with both antennas moving up together
+    in quick succession, expressing excitement and happiness.
+
+    Args:
+        robot: ReachyMini robot instance
+    """
+    try:
+        # Excited bouncing pattern (3 bounces)
+        for _ in range(3):
+            # Bounce up together
+            robot.goto_target(antennas=[1.0, 1.0], duration=0.2)
+            time.sleep(0.2)
+
+            # Down together
+            robot.goto_target(antennas=[0.3, 0.3], duration=0.2)
+            time.sleep(0.2)
+
+        # End high and happy
+        robot.goto_target(antennas=[0.8, 0.8], duration=0.3)
+        time.sleep(0.3)
+
+        print("   😊 Happy antenna bounce completed!")
+
+    except Exception as e:
+        print(f"   ⚠️ Happy antenna error: {e}")
+
+
+def antennas_sad_droop(robot):
+    """
+    Slowly droop antennas for sad emotion.
+
+    Creates a melancholic wilting pattern where antennas slowly lower,
+    expressing sadness and disappointment.
+
+    Args:
+        robot: ReachyMini robot instance
+    """
+    try:
+        # Slow wilting pattern
+        # Start from neutral
+        robot.goto_target(antennas=[0, 0], duration=0.3)
+        time.sleep(0.3)
+
+        # Droop down slowly
+        robot.goto_target(antennas=[-0.5, -0.5], duration=0.6)
+        time.sleep(0.6)
+
+        # Droop even lower
+        robot.goto_target(antennas=[-0.8, -0.8], duration=0.6)
+        time.sleep(0.6)
+
+        print("   😢 Sad antenna droop completed!")
+
+    except Exception as e:
+        print(f"   ⚠️ Sad antenna error: {e}")
+
+
+# ============================================================
 # EMOTION STATE MACHINE
 # ============================================================
 
@@ -327,22 +425,28 @@ class EmotionStateMachine:
         self.last_emotion_time = time.time()
 
     def execute_emotion(self):
-        """Execute the current emotion with speech if needed."""
+        """Execute the current emotion with speech, antenna gestures, and emotion displays."""
         if self.state == "NEUTRAL" or self.emotion_in_progress:
             return
 
         self.emotion_in_progress = True
 
         try:
-            # Play speech first (non-blocking), then show emotion
+            # Execute emotion-specific behaviors with antenna gestures
             if self.state == "CURIOUS":
+                # Greeting sequence: antenna wave → speech → curious emotion
+                antennas_curious_wave(self.robot)
                 play_speech_for_emotion(self.robot, 'curious')
                 show_curious(self.robot)
             elif self.state == "HAPPY":
+                # Happy sequence: antenna bounce → speech → happy emotion
+                antennas_happy_bounce(self.robot)
                 play_speech_for_emotion(self.robot, 'happy')
                 show_happy(self.robot)
             elif self.state == "SAD":
+                # Sad sequence: speech → antenna droop → sad emotion
                 play_speech_for_emotion(self.robot, 'sad')
+                antennas_sad_droop(self.robot)
                 show_sad(self.robot)
 
             # Return to neutral state after emotion
